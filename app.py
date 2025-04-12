@@ -60,16 +60,27 @@ st.write("Número de gastos encontrados:", len(df_gastos))
 # Agrupamos gastos por categoría
 gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
 
-st.write("Columnas disponibles:", df_gastos.columns.tolist())
-# Gráfico circular (pie)
-st.subheader("🍕 Distribución de gastos por categoría")
-fig_pie = px.pie(
-    gastos_categoria, 
-    values='Monto', 
-    names='Categoría',
-    title='Distribución porcentual por categoría',
-    hole=0.4  # Para un estilo "dona"
-)
+# Gráfico circular (si hay datos)
+df_gastos = df[df['tipo'] == 'Gasto']
+
+if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
+    gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
+
+    if not gastos_categoria.empty:
+        st.subheader("🍕 Distribución de gastos por categoría")
+        fig_pie = px.pie(
+            gastos_categoria,
+            values='monto',
+            names='categoria',
+            title='Distribución porcentual por categoría',
+            hole=0.4
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+    else:
+        st.info("⚠️ No hay montos válidos para las categorías.")
+else:
+    st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
+
 
 # --- NUEVO FORMULARIO PERSONALIZADO ---
 st.subheader("➕ Añadir nuevo movimiento")
