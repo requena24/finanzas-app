@@ -81,8 +81,11 @@ if 'Categoría' in df_gastos.columns and not df_gastos['Categoría'].isna().all(
 else:
     st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
 
+# Convertimos datos a DataFrame de Pandas
+df = pd.DataFrame(datos)
 # Convertimos el DataFrame original a Excel
 st.subheader("📥 Exportar movimientos a Excel")
+st.write("Filas en DataFrame:", len(df))
 
 # Botón para generar el archivo
 if st.button("Exportar a Excel"):
