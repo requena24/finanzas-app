@@ -83,30 +83,24 @@ else:
 
 import io
 
-st.subheader("📥 Exportar movimientos a Excel (test)")
+st.subheader("📥 Exportar movimientos a Excel")
 
-try:
-    # Muestra el DataFrame para verificar que existe
-    st.write("Vista previa de los datos:")
-    st.dataframe(df)
-
-    # Generar archivo Excel
+if not df.empty:
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Movimientos')
     writer.close()
     output.seek(0)
 
-    # Botón de descarga
     st.download_button(
         label="📤 Descargar archivo Excel",
         data=output,
         file_name="finanzas_personales.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+else:
+    st.info("⚠️ No hay datos disponibles para exportar.")
 
-except Exception as e:
-    st.error(f"Ocurrió un error al intentar exportar: {e}")
 
 # --- NUEVO FORMULARIO PERSONALIZADO ---
 st.subheader("➕ Añadir nuevo movimiento")
