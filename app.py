@@ -1,30 +1,33 @@
-# Importamos Streamlit y librerías necesarias
+# Importar librerías
 import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
+import pandas as pd
 
-# Título de la app
-st.title("📊 Finanzas Personales - Validar Conexión Google Sheets")
+# Título para la app
+st.title("📊 Validación Google Sheets ↔️ Streamlit")
 
-# Definir permisos para la app (scopes)
+# Configuración del acceso a Google Sheets usando Secrets en formato TOML
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Conectar a Google Sheets usando las credenciales guardadas en Streamlit Secrets
-credentials = Credentials.from_service_account_info(st.secrets, scopes=scope)
+# Aquí obtenemos las credenciales desde los secrets guardados en Streamlit Cloud
+credentials = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"], scopes=scope
+)
 
-# Crear un cliente para interactuar con Google Sheets
+# Creamos cliente autorizado para Google Sheets
 client = gspread.authorize(credentials)
 
-# Abrir la hoja específica (Reemplaza con el nombre exacto de tu hoja de Google Sheets)
-sheet = client.open("finanzas-personales").worksheet("Hoja1")
+# Abrir la hoja específica (REEMPLAZA con el nombre de tu Google Sheet)
+sheet = client.open("NOMBRE_EXACTO_DE_TU_GOOGLE_SHEET").worksheet("Hoja1")
 
-# Obtener todos los datos de la hoja
+# Leer todos los datos y guardarlos en una variable
 datos = sheet.get_all_records()
 
-# Mostrar datos en pantalla con Streamlit
-st.write("✅ Conexión exitosa. Datos en tu Google Sheet:")
-st.dataframe(datos)  # Esto los muestra como una tabla bonita en Streamlit
+# Mostrar los datos en la app
+st.write("✅ ¡Datos cargados correctamente desde Google Sheets!")
+st.dataframe(pd.DataFrame(datos))
