@@ -59,17 +59,17 @@ df_gastos = df[df['Tipo'] == 'Gasto']
 gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
 
 # Gráfico circular (si hay datos)
-df_gastos = df[df['tipo'] == 'Gasto']
+df_gastos = df[df['Tipo'] == 'Gasto']
 
-if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
-    gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
+if 'categoria' in df_gastos.columns and not df_gastos['Categoria'].isna().all():
+    gastos_categoria = df_gastos.groupby('Categoria')['Monto'].sum().reset_index()
 
     if not gastos_categoria.empty:
         st.subheader("🍕 Distribución de gastos por categoría")
         fig_pie = px.pie(
             gastos_categoria,
-            values='monto',
-            names='categoria',
+            values='Monto',
+            names='Categoria',
             title='Distribución porcentual por categoría',
             hole=0.4
         )
