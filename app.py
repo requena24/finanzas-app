@@ -54,6 +54,8 @@ st.plotly_chart(fig_bar, use_container_width=True)
 
 # Filtramos solo gastos para el gráfico circular
 df_gastos = df[df['Tipo'] == 'Gasto']
+st.write("Número de gastos encontrados:", len(df_gastos))
+
 
 # Agrupamos gastos por categoría
 gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
