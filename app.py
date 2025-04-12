@@ -4,6 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
+import plotly.express as px
 
 # Título principal
 st.title("💰 Finanzas Personales")
@@ -18,18 +19,54 @@ scope = [
 credentials = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"], scopes=scope
 )
-
 client = gspread.authorize(credentials)
-
 # Abrir hoja (reemplaza con tu nombre exacto)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
 # Cargar datos existentes
 datos = sheet.get_all_records()
-
 # Mostrar datos actuales
 st.subheader("📋 Movimientos actuales")
 st.dataframe(pd.DataFrame(datos))
+
+# Convertimos datos a DataFrame de Pandas
+df = pd.DataFrame(datos)
+
+# Asegurarnos que 'Monto' sea numérico (por seguridad)
+df['Monto'] = pd.to_numeric(df['Monto'], errors='coerce').fillna(0)
+
+# Agrupamos por Mes y Tipo para sumar los montos
+resumen_mensual = df.groupby(['Mes', 'Tipo'])['Monto'].sum().reset_index()
+
+# Gráfico de barras
+st.subheader("📊 Ingresos vs Gastos por mes")
+fig_bar = px.bar(
+    resumen_mensual, 
+    x='Mes', 
+    y='Monto', 
+    color='Tipo', 
+    barmode='group', 
+    text_auto='.2s',
+    labels={'Monto': 'Total', 'Mes': 'Mes'}
+)
+
+st.plotly_chart(fig_bar, use_container_width=True)
+
+# Filtramos solo gastos para el gráfico circular
+df_gastos = df[df['Tipo'] == 'Gasto']
+
+# Agrupamos gastos por categoría
+gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
+
+# Gráfico circular (pie)
+st.subheader("🍕 Distribución de gastos por categoría")
+fig_pie = px.pie(
+    gastos_categoria, 
+    values='Monto', 
+    names='Categoría',
+    title='Distribución porcentual por categoría',
+    hole=0.4  # Para un estilo "dona"
+)
 
 # --- NUEVO FORMULARIO PERSONALIZADO ---
 st.subheader("➕ Añadir nuevo movimiento")
