@@ -5,6 +5,8 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
+import io  # para manejar archivos en memoria
+import xlsxwriter
 
 # Título principal
 st.title("💰 Finanzas Personales")
@@ -79,6 +81,24 @@ if 'Categoría' in df_gastos.columns and not df_gastos['Categoría'].isna().all(
 else:
     st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
 
+# Convertimos el DataFrame original a Excel
+st.subheader("📥 Exportar movimientos a Excel")
+
+# Botón para generar el archivo
+if st.button("Exportar a Excel"):
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Movimientos')
+    writer.close()
+    output.seek(0)
+
+    # Descargar el archivo
+    st.download_button(
+        label="📤 Descargar archivo Excel",
+        data=output,
+        file_name="finanzas_personales.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # --- NUEVO FORMULARIO PERSONALIZADO ---
 st.subheader("➕ Añadir nuevo movimiento")
