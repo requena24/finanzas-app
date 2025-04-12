@@ -69,7 +69,7 @@ if 'categoria' in df_gastos.columns and not df_gastos['Categoria'].isna().all():
         fig_pie = px.pie(
             gastos_categoria,
             values='Monto',
-            names='Categoria',
+            names='Categoría',
             title='Distribución porcentual por categoría',
             hole=0.4
         )
