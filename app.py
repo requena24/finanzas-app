@@ -61,8 +61,8 @@ gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
 # Gráfico circular (si hay datos)
 df_gastos = df[df['Tipo'] == 'Gasto']
 
-if 'categoria' in df_gastos.columns and not df_gastos['Categoria'].isna().all():
-    gastos_categoria = df_gastos.groupby('Categoria')['Monto'].sum().reset_index()
+if 'categoria' in df_gastos.columns and not df_gastos['Categoría'].isna().all():
+    gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
 
     if not gastos_categoria.empty:
         st.subheader("🍕 Distribución de gastos por categoría")
