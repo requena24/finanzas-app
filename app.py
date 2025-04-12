@@ -60,6 +60,7 @@ st.write("Número de gastos encontrados:", len(df_gastos))
 # Agrupamos gastos por categoría
 gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
 
+st.write("Columnas disponibles:", df_gastos.columns.tolist())
 # Gráfico circular (pie)
 st.subheader("🍕 Distribución de gastos por categoría")
 fig_pie = px.pie(
