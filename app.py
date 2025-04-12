@@ -81,27 +81,32 @@ if 'Categoría' in df_gastos.columns and not df_gastos['Categoría'].isna().all(
 else:
     st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
 
-# Convertimos datos a DataFrame de Pandas
-df = pd.DataFrame(datos)
-# Convertimos el DataFrame original a Excel
-st.subheader("📥 Exportar movimientos a Excel")
-st.write("Filas en DataFrame:", len(df))
+import io
 
-# Botón para generar el archivo
-if st.button("Exportar a Excel"):
+st.subheader("📥 Exportar movimientos a Excel (test)")
+
+try:
+    # Muestra el DataFrame para verificar que existe
+    st.write("Vista previa de los datos:")
+    st.dataframe(df)
+
+    # Generar archivo Excel
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Movimientos')
     writer.close()
     output.seek(0)
 
-    # Descargar el archivo
+    # Botón de descarga
     st.download_button(
         label="📤 Descargar archivo Excel",
         data=output,
         file_name="finanzas_personales.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+except Exception as e:
+    st.error(f"Ocurrió un error al intentar exportar: {e}")
 
 # --- NUEVO FORMULARIO PERSONALIZADO ---
 st.subheader("➕ Añadir nuevo movimiento")
