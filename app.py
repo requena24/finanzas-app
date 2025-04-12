@@ -23,7 +23,7 @@ credentials = Credentials.from_service_account_info(
 client = gspread.authorize(credentials)
 
 # Abrir la hoja específica (REEMPLAZA con el nombre de tu Google Sheet)
-sheet = client.open("NOMBRE_EXACTO_DE_TU_GOOGLE_SHEET").worksheet("Hoja1")
+sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
 # Leer todos los datos y guardarlos en una variable
 datos = sheet.get_all_records()
