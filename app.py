@@ -1,38 +1,30 @@
+# Importamos Streamlit y librerías necesarias
 import streamlit as st
-import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 
-# Configuración de la app
-st.set_page_config(page_title="Finanzas Personales", page_icon="💰", layout="centered")
+# Título de la app
+st.title("📊 Finanzas Personales - Validar Conexión Google Sheets")
 
-st.title("💰 App de Finanzas Personales")
-st.markdown("Gestión simple y eficiente de tus ingresos y gastos. 📊")
+# Definir permisos para la app (scopes)
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
-# Conectar con Google Sheets
-# Define el alcance
-scope = ["https://www.googleapis.com/auth/spreadsheets",
-         "https://www.googleapis.com/auth/drive"]
+# Conectar a Google Sheets usando las credenciales guardadas en Streamlit Secrets
+credentials = Credentials.from_service_account_info(st.secrets, scopes=scope)
 
-# Carga las credenciales desde variables de entorno en Streamlit Cloud
-import json
-from google.oauth2.service_account import Credentials
+# Crear un cliente para interactuar con Google Sheets
+client = gspread.authorize(credentials)
 
-service_account_info = json.loads(st.secrets["gcp_service_account"])
-credentials = Credentials.from_service_account_info(service_account_info, scopes=scope)
+# Abrir la hoja específica (Reemplaza con el nombre exacto de tu hoja de Google Sheets)
+sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
-# Autenticación con gspread
-gc = gspread.authorize(credentials)
+# Obtener todos los datos de la hoja
+datos = sheet.get_all_records()
 
-# ID de tu Google Sheet
-SPREADSHEET_ID = "1b6Ci77d0MBua_dS8uGa5cNdj1F_66w4Ju4ONp8GgVD4/edit?gid=0#gid=0"
-
-# Abrir la hoja
-sheet = gc.open_by_key(SPREADSHEET_ID)
-worksheet = sheet.sheet1
-
-# Leer los datos
-data = worksheet.get_all_records()
-df = pd.DataFrame(data)
-
-st.dataframe(df)
+# Mostrar datos en pantalla con Streamlit
+st.write("✅ Conexión exitosa. Datos en tu Google Sheet:")
+st.dataframe(datos)  # Esto los muestra como una tabla bonita en Streamlit
