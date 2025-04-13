@@ -22,14 +22,18 @@ credentials = Credentials.from_service_account_info(
 )
 client = gspread.authorize(credentials)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
+sheet_wallet = client.open("finanzas-personales").worksheet("Wallet")
 
 # Cargar datos
 datos = sheet.get_all_records()
 df = pd.DataFrame(datos)
 df.columns = [str(col).lower() for col in df.columns]
 
+# Cargar tarjetas desde wallet
+tarjetas = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
+
 # Tabs para organizar secciones
-secciones = st.tabs(["➕ Agregar movimiento", "📋 Movimientos", "🗑 Eliminar", "📊 Gráficos"])
+secciones = st.tabs(["➕ Agregar movimiento", "📋 Movimientos", "🗑 Eliminar", "📊 Gráficos", "💳 Wallet"])
 
 # ============================
 # TAB 1: AGREGAR NUEVO GASTO
@@ -44,13 +48,40 @@ with secciones[0]:
         concepto = st.text_input("Concepto:")
         monto = st.number_input("Monto:", min_value=0.0, step=1.0)
         forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
+
+        tarjeta_usada = ""
+        if forma_pago == "Tarjeta" and tarjetas:
+            tarjeta_usada = st.selectbox("Selecciona la tarjeta usada:", tarjetas)
+        elif forma_pago == "Tarjeta":
+            st.warning("⚠️ No tienes tarjetas registradas. Ve a la sección Wallet para agregarlas.")
+
         nota = st.text_area("Nota (opcional):")
         submit = st.form_submit_button("Guardar movimiento 💾")
 
         if submit:
-            nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
+            forma_completa = tarjeta_usada if forma_pago == "Tarjeta" and tarjeta_usada else forma_pago
+            nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_completa, nota]
             sheet.append_row(nueva_fila)
             st.success("✅ Movimiento guardado correctamente. Recarga la app para ver los cambios.")
+
+# ============================
+# TAB 5: WALLET
+# ============================
+with secciones[4]:
+    st.subheader("💳 Tus métodos de pago")
+    tarjetas_actuales = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
+    if tarjetas_actuales:
+        st.write("Tarjetas registradas:")
+        st.table(pd.DataFrame(tarjetas_actuales, columns=["Tarjeta"]))
+    else:
+        st.info("No tienes tarjetas registradas.")
+
+    with st.form("form_wallet"):
+        nueva_tarjeta = st.text_input("Nombre de nueva tarjeta (ej. BBVA Azul, Citibanamex Oro):")
+        guardar_tarjeta = st.form_submit_button("Agregar tarjeta 💳")
+        if guardar_tarjeta and nueva_tarjeta:
+            sheet_wallet.append_row([nueva_tarjeta])
+            st.success("✅ Tarjeta agregada correctamente. Recarga la app para verla en la lista.")
 
 # ============================
 # TAB 2: MOSTRAR MOVIMIENTOS
