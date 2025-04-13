@@ -32,7 +32,35 @@ df.columns = df.columns.str.lower()
 st.subheader("📋 Movimientos actuales")
 st.dataframe(df)
 
-# Gráfico de barras
+# =============================
+# SECCIÓN: ELIMINAR MOVIMIENTOS
+# =============================
+st.subheader("🗑 Eliminar movimientos")
+
+# Creamos el estado inicial para los checkboxes si no existe
+definir_claves_checkboxes = "checkboxes" not in st.session_state
+if definir_claves_checkboxes:
+    st.session_state.checkboxes = {}
+
+# Mostramos un resumen por fila con checkbox para marcar
+st.caption("Selecciona los movimientos que deseas eliminar:")
+
+# Recorremos cada fila del DataFrame y creamos un checkbox único
+for idx, row in df.iterrows():
+    checkbox_key = f"del_{idx}"
+
+    # Mostramos cada movimiento como una línea con resumen e ID
+    seleccionado = st.checkbox(
+        f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
+        key=checkbox_key
+    )
+
+    # Guardamos el estado actual del checkbox en session_state
+    st.session_state.checkboxes[checkbox_key] = seleccionado
+
+# ==================================
+# GRÁFICO DE BARRAS: INGRESOS/GASTOS
+# ==================================
 df['monto'] = pd.to_numeric(df['monto'], errors='coerce').fillna(0)
 resumen_mensual = df.groupby(['mes', 'tipo'])['monto'].sum().reset_index()
 st.subheader("📊 Ingresos vs Gastos por mes")
@@ -47,7 +75,9 @@ fig_bar = px.bar(
 )
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Gráfico circular
+# ===============================
+# GRÁFICO CIRCULAR DE CATEGORÍAS
+# ===============================
 df_gastos = df[df['tipo'] == 'Gasto']
 if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
     gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
@@ -66,8 +96,10 @@ if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
 else:
     st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
 
-# Exportar a Excel
-st.subheader("📅 Exportar movimientos a Excel")
+# ==============================
+# EXPORTAR MOVIMIENTOS A EXCEL
+# ==============================
+st.subheader("📥 Exportar movimientos a Excel")
 if not df.empty:
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -75,7 +107,7 @@ if not df.empty:
     writer.close()
     output.seek(0)
     st.download_button(
-        label="📄 Descargar archivo Excel",
+        label="📤 Descargar archivo Excel",
         data=output,
         file_name="finanzas_personales.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -83,7 +115,9 @@ if not df.empty:
 else:
     st.info("⚠️ No hay datos disponibles para exportar.")
 
-# Formulario para agregar nuevo movimiento
+# ============================
+# FORMULARIO PARA NUEVO GASTO
+# ============================
 st.subheader("➕ Añadir nuevo movimiento")
 fecha = st.date_input("Fecha:", datetime.today())
 mes = fecha.strftime("%B")
@@ -94,7 +128,7 @@ monto = st.number_input("Monto:", min_value=0.0, step=1.0)
 forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
 nota = st.text_area("Nota (opcional):")
 
-if st.button("Guardar movimiento 📂"):
+if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
