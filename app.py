@@ -50,10 +50,11 @@ with secciones[0]:
         forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
 
         tarjeta_usada = ""
-        if forma_pago == "Tarjeta" and tarjetas:
-            tarjeta_usada = st.selectbox("Selecciona la tarjeta usada:", tarjetas)
-        elif forma_pago == "Tarjeta":
-            st.warning("⚠️ No tienes tarjetas registradas. Ve a la sección Wallet para agregarlas.")
+        if forma_pago == "Tarjeta":
+            if tarjetas:
+                tarjeta_usada = st.selectbox("Selecciona la tarjeta usada:", tarjetas)
+            else:
+                st.warning("⚠️ No tienes tarjetas registradas. Ve a la sección Wallet para agregarlas.")
 
         nota = st.text_area("Nota (opcional):")
         submit = st.form_submit_button("Guardar movimiento 💾")
@@ -72,7 +73,7 @@ with secciones[4]:
     tarjetas_actuales = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
     if tarjetas_actuales:
         st.write("Tarjetas registradas:")
-        st.table(pd.DataFrame(tarjetas_actuales, columns=["Tarjeta"]))
+        st.dataframe(pd.DataFrame(tarjetas_actuales, columns=["Tarjeta"]), hide_index=True)
     else:
         st.info("No tienes tarjetas registradas.")
 
