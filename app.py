@@ -9,8 +9,12 @@ import plotly.express as px
 # Título principal
 st.title("💰 Finanzas Personales")
 
+# Inicializar estado de recarga si no existe
+if "recargar" not in st.session_state:
+    st.session_state.recargar = False
+
 # Recargar si es necesario
-if st.session_state.get("recargar", False):
+if st.session_state.recargar:
     st.session_state.recargar = False
     st.experimental_rerun()
 
