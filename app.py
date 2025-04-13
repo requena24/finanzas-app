@@ -30,7 +30,7 @@ df = pd.DataFrame(datos)
 df.columns = [str(col).lower() for col in df.columns]
 
 # Cargar tarjetas desde wallet
-tarjetas = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
+# tarjetas = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []  # ← movido dentro del formulario
 
 # Tabs para organizar secciones
 secciones = st.tabs(["➕ Agregar movimiento", "📋 Movimientos", "🗑 Eliminar", "📊 Gráficos", "💳 Wallet"])
@@ -51,6 +51,7 @@ with secciones[0]:
 
         tarjeta_usada = ""
         if forma_pago == "Tarjeta":
+            tarjetas = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
             if tarjetas:
                 tarjeta_usada = st.selectbox("Selecciona la tarjeta usada:", tarjetas)
             else:
