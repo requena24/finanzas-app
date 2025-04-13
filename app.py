@@ -42,7 +42,9 @@ secciones = st.tabs(["📋 Movimientos", "➕ Agregar movimiento", "📑 Formas 
 with secciones[0]:
     st.subheader("📋 Movimientos actuales")
     if not df.empty:
-        st.dataframe(df, hide_index=True)
+        df_display = df.copy()
+        df_display['fecha'] = df_display['fecha'].dt.strftime('%d/%m/%Y')
+        st.dataframe(df_display, hide_index=True)
     else:
         st.info("No hay movimientos registrados.")
 
@@ -212,4 +214,3 @@ with secciones[5]:
                 st.warning("⚠️ No se seleccionó ningún movimiento para eliminar.")
     else:
         st.info("No hay movimientos para eliminar.")
-
