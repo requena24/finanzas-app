@@ -60,7 +60,7 @@ with secciones[1]:
         tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
         categoria = st.text_input("Categoría:")
         concepto = st.text_input("Concepto:")
-        monto = st.number_input("Monto:", min_value=0.0, step=1.0)
+        monto = st.number_input("Monto ($):", min_value=0.0, step=1.0, format="%.2f")
         forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
 
         tarjetas = [""] + sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else [""]
@@ -193,7 +193,10 @@ with secciones[5]:
 
         eliminar_click = st.button("Eliminar seleccionados 🗑️")
 
-        edited_df = st.data_editor(
+        df_edit_display = df.copy()
+        df_edit_display['fecha'] = df_edit_display['fecha'].dt.strftime('%d/%m/%Y')
+        df_edit_display['monto'] = df_edit_display['monto'].apply(lambda x: f"$ {x:,.2f}")
+        edited_df = st.data_editor(df_edit_display, 
             df,
             use_container_width=True,
             column_order=list(df.columns),
