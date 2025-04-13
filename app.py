@@ -5,6 +5,7 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Título principal
 st.title("💰 Finanzas Personales")
@@ -114,6 +115,12 @@ with secciones[3]:
             text_auto='.2s',
             labels={'monto': 'Total', 'mes': 'Mes'}
         )
+        fig_bar.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(size=14),
+            margin=dict(t=40, l=10, r=10, b=40)
+        )
         st.plotly_chart(fig_bar, use_container_width=True)
     else:
         st.info("⚠️ No se encontraron columnas necesarias para mostrar el gráfico de barras.")
@@ -130,6 +137,14 @@ with secciones[3]:
                     names='categoria',
                     title='Distribución porcentual por categoría',
                     hole=0.4
+                )
+                fig_pie.update_traces(textinfo='percent+label', pull=[0.02]*len(gastos_categoria))
+                fig_pie.update_layout(
+                    showlegend=True,
+                    margin=dict(t=40, l=10, r=10, b=40),
+                    font=dict(size=14),
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)'
                 )
                 st.plotly_chart(fig_pie, use_container_width=True)
             else:
