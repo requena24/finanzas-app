@@ -55,19 +55,22 @@ for idx, row in df.iterrows():
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
 # ==================================
-df['monto'] = pd.to_numeric(df['monto'], errors='coerce').fillna(0)
-resumen_mensual = df.groupby(['mes', 'tipo'])['monto'].sum().reset_index()
-st.subheader("📊 Ingresos vs Gastos por mes")
-fig_bar = px.bar(
-    resumen_mensual,
-    x='mes',
-    y='monto',
-    color='tipo',
-    barmode='group',
-    text_auto='.2s',
-    labels={'monto': 'Total', 'mes': 'Mes'}
-)
-st.plotly_chart(fig_bar, use_container_width=True)
+if 'monto' in df.columns and 'mes' in df.columns and 'tipo' in df.columns:
+    df['monto'] = pd.to_numeric(df['monto'], errors='coerce').fillna(0)
+    resumen_mensual = df.groupby(['mes', 'tipo'])['monto'].sum().reset_index()
+    st.subheader("📊 Ingresos vs Gastos por mes")
+    fig_bar = px.bar(
+        resumen_mensual,
+        x='mes',
+        y='monto',
+        color='tipo',
+        barmode='group',
+        text_auto='.2s',
+        labels={'monto': 'Total', 'mes': 'Mes'}
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
+else:
+    st.info("⚠️ No se encontraron columnas necesarias para mostrar el gráfico de barras.")
 
 # ===============================
 # GRÁFICO CIRCULAR DE CATEGORÍAS
