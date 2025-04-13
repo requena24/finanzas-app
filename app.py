@@ -5,8 +5,6 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
-import io
-import xlsxwriter
 
 # Título principal
 st.title("💰 Finanzas Personales")
@@ -23,9 +21,6 @@ credentials = Credentials.from_service_account_info(
 )
 client = gspread.authorize(credentials)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
-
-# Bandera de recarga para ejecutar rerun al final
-recarga_solicitada = False
 
 # ============================
 # FORMULARIO PARA NUEVO GASTO
@@ -44,7 +39,7 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
-    recarga_solicitada = True
+    st.stop()
 
 # Cargar datos
 datos = sheet.get_all_records()
@@ -70,7 +65,7 @@ for idx, row in df.iterrows():
         if st.button("🗑️", key=f"delete_{idx}"):
             sheet.delete_rows(idx + 2)
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            recarga_solicitada = True
+            st.stop()
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -115,26 +110,3 @@ if 'tipo' in df.columns and 'categoria' in df.columns and 'monto' in df.columns:
         st.info("⚠️ No hay datos válidos de gastos para mostrar el gráfico.")
 else:
     st.info("⚠️ No se encontraron columnas necesarias para mostrar el gráfico circular.")
-
-# ==============================
-# EXPORTAR MOVIMIENTOS A EXCEL
-# ==============================
-st.subheader("📥 Exportar movimientos a Excel")
-if not df.empty:
-    output = io.BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index=False, sheet_name='Movimientos')
-    writer.close()
-    output.seek(0)
-    st.download_button(
-        label="📤 Descargar archivo Excel",
-        data=output,
-        file_name="finanzas_personales.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-else:
-    st.info("⚠️ No hay datos disponibles para exportar.")
-
-# Ejecutar recarga al final si fue solicitada
-if recarga_solicitada:
-    st.experimental_rerun()
