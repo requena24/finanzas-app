@@ -55,7 +55,7 @@ st.dataframe(df)
 st.subheader("🗑 Eliminar movimientos")
 
 if not df.empty:
-    df['Seleccionar'] = False
+    df.insert(0, 'Seleccionar', False)
 
     col_boton, _ = st.columns([1, 5])
     with col_boton:
