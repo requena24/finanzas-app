@@ -56,6 +56,11 @@ st.subheader("🗑 Eliminar movimientos")
 
 if not df.empty:
     df['Seleccionar'] = False
+
+    col_boton, _ = st.columns([1, 5])
+    with col_boton:
+        eliminar_click = st.button("Eliminar seleccionados 🗑️")
+
     edited_df = st.data_editor(
         df,
         use_container_width=True,
@@ -70,7 +75,7 @@ if not df.empty:
         key="editor"
     )
 
-    if st.button("Eliminar seleccionados 🗑️"):
+    if eliminar_click:
         rows_to_delete = edited_df[edited_df["Seleccionar"] == True]
         if not rows_to_delete.empty:
             for i in rows_to_delete.index:
