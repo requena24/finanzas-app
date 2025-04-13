@@ -44,6 +44,20 @@ if "checkboxes" not in st.session_state:
 # Mostramos un resumen por fila con checkbox para marcar
 st.caption("Selecciona los movimientos que deseas eliminar:")
 
+# Botón de eliminar en la parte superior
+if st.button("🗑 Eliminar seleccionados"):
+    # Obtener índices seleccionados (donde el checkbox esté marcado)
+    filas_a_eliminar = [int(key.split("_")[1]) for key, val in st.session_state.checkboxes.items() if val]
+
+    if filas_a_eliminar:
+        filas_a_eliminar.sort(reverse=True)  # Eliminar desde el final para evitar desajustes
+        for fila in filas_a_eliminar:
+            sheet.delete_rows(fila + 2)  # +2 por encabezado y base 0
+        st.success(f"✅ Se eliminaron {len(filas_a_eliminar)} movimiento(s).")
+        st.experimental_rerun()
+    else:
+        st.info("No has seleccionado ningún movimiento para eliminar.")
+
 # Recorremos cada fila del DataFrame y creamos un checkbox único
 for idx, row in df.iterrows():
     checkbox_key = f"del_{idx}"
