@@ -38,8 +38,7 @@ st.dataframe(df)
 st.subheader("🗑 Eliminar movimientos")
 
 # Creamos el estado inicial para los checkboxes si no existe
-definir_claves_checkboxes = "checkboxes" not in st.session_state
-if definir_claves_checkboxes:
+if "checkboxes" not in st.session_state:
     st.session_state.checkboxes = {}
 
 # Mostramos un resumen por fila con checkbox para marcar
@@ -48,15 +47,14 @@ st.caption("Selecciona los movimientos que deseas eliminar:")
 # Recorremos cada fila del DataFrame y creamos un checkbox único
 for idx, row in df.iterrows():
     checkbox_key = f"del_{idx}"
-
-    # Mostramos cada movimiento como una línea con resumen e ID
-    seleccionado = st.checkbox(
-        f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
-        key=checkbox_key
-    )
-
-    # Guardamos el estado actual del checkbox en session_state
-    st.session_state.checkboxes[checkbox_key] = seleccionado
+    try:
+        seleccionado = st.checkbox(
+            f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
+            key=checkbox_key
+        )
+        st.session_state.checkboxes[checkbox_key] = seleccionado
+    except KeyError as e:
+        st.warning(f"⚠️ Error al mostrar fila {idx}: columna faltante: {e}")
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -132,4 +130,4 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
-    st.experimental_rerun() 
+    st.experimental_rerun()
