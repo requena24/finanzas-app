@@ -35,19 +35,21 @@ secciones = st.tabs(["➕ Agregar movimiento", "📋 Movimientos", "🗑 Elimina
 # ============================
 with secciones[0]:
     st.subheader("➕ Añadir nuevo movimiento")
-    fecha = st.date_input("Fecha:", datetime.today())
-    mes = fecha.strftime("%B")
-    tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
-    categoria = st.text_input("Categoría:")
-    concepto = st.text_input("Concepto:")
-    monto = st.number_input("Monto:", min_value=0.0, step=1.0)
-    forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
-    nota = st.text_area("Nota (opcional):")
+    with st.form("formulario_movimiento"):
+        fecha = st.date_input("Fecha:", datetime.today())
+        mes = fecha.strftime("%B")
+        tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
+        categoria = st.text_input("Categoría:")
+        concepto = st.text_input("Concepto:")
+        monto = st.number_input("Monto:", min_value=0.0, step=1.0)
+        forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
+        nota = st.text_area("Nota (opcional):")
+        submit = st.form_submit_button("Guardar movimiento 💾")
 
-    if st.button("Guardar movimiento 💾"):
-        nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
-        sheet.append_row(nueva_fila)
-        st.success("✅ Movimiento guardado correctamente. Recarga la app para ver los cambios.")
+        if submit:
+            nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
+            sheet.append_row(nueva_fila)
+            st.success("✅ Movimiento guardado correctamente. Recarga la app para ver los cambios.")
 
 # ============================
 # TAB 2: MOSTRAR MOVIMIENTOS
