@@ -5,14 +5,18 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
-import sys
 
 # Título principal
 st.title("💰 Finanzas Personales")
 
-# Botón para recargar la app manualmente
+# Recargar si es necesario
+if st.session_state.get("recargar", False):
+    st.session_state.recargar = False
+    st.experimental_rerun()
+
+# Botón para recargar manualmente
 if st.button("🔄 Recargar app"):
-    st.rerun()
+    st.experimental_rerun()
 
 # Conexión a Google Sheets
 scope = [
@@ -44,7 +48,7 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
-    sys.exit()
+    st.session_state.recargar = True
 
 # Cargar datos
 datos = sheet.get_all_records()
@@ -70,7 +74,7 @@ for idx, row in df.iterrows():
         if st.button("🗑️", key=f"delete_{idx}"):
             sheet.delete_rows(idx + 2)
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            sys.exit()
+            st.session_state.recargar = True
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
