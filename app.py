@@ -37,42 +37,18 @@ st.dataframe(df)
 # =============================
 st.subheader("🗑 Eliminar movimientos")
 
-# Creamos el estado inicial para los checkboxes si no existe
-if "checkboxes" not in st.session_state:
-    st.session_state.checkboxes = {}
+st.caption("Haz clic en el botón para eliminar un movimiento específico:")
 
-# Mostramos un resumen por fila con checkbox para marcar
-st.caption("Selecciona los movimientos que deseas eliminar:")
-
-# Recorremos cada fila del DataFrame y creamos un checkbox único
-checkboxes_seleccionados = []
+# Recorremos cada fila del DataFrame y creamos un botón único por fila
 for idx, row in df.iterrows():
-    checkbox_key = f"del_{idx}"
-    try:
-        seleccionado = st.checkbox(
-            f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
-            key=checkbox_key
-        )
-        if seleccionado:
-            checkboxes_seleccionados.append(idx)
-    except KeyError as e:
-        st.warning(f"⚠️ Error al mostrar fila {idx}: columna faltante: {e}")
-
-# Línea divisoria y botón después de la lista de checkboxes
-st.markdown("---")
-
-# Botón que solo aparece si hay datos
-if df.shape[0] > 0:
-    eliminar = st.button("🗑 Eliminar seleccionados")
-    if eliminar:
-        if checkboxes_seleccionados:
-            checkboxes_seleccionados.sort(reverse=True)  # Eliminar desde el final para evitar desajustes
-            for fila in checkboxes_seleccionados:
-                sheet.delete_rows(fila + 2)  # +2 por encabezado y base 0
-            st.success(f"✅ Se eliminaron {len(checkboxes_seleccionados)} movimiento(s).")
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        st.write(f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}")
+    with col2:
+        if st.button("🗑️", key=f"delete_{idx}"):
+            sheet.delete_rows(idx + 2)  # +2 por encabezado y base 0
+            st.success(f"✅ Movimiento eliminado: {row['concepto']}")
             st.experimental_rerun()
-        else:
-            st.info("No has seleccionado ningún movimiento para eliminar.")
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -135,7 +111,7 @@ else:
 # FORMULARIO PARA NUEVO GASTO
 # ============================
 st.subheader("➕ Añadir nuevo movimiento")
-fecha = st.date_input("Fecha:", datetime.today())
+fecha = st.date_input("Fecha:", datetime.today(), format="%d/%m/%Y")
 mes = fecha.strftime("%B")
 tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
 categoria = st.text_input("Categoría:")
