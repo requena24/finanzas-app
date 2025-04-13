@@ -11,6 +11,7 @@ import xlsxwriter
 # Título principal
 st.title("💰 Finanzas Personales")
 
+# Manejo de sesión para recargar tras eliminar
 if st.session_state.get("movimiento_eliminado"):
     st.session_state["movimiento_eliminado"] = False
     st.experimental_rerun()
