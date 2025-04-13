@@ -56,7 +56,10 @@ with secciones[0]:
 # ============================
 with secciones[1]:
     st.subheader("📋 Movimientos actuales")
-    st.dataframe(df)
+    if not df.empty:
+        st.dataframe(df.drop(columns=[df.columns[0]]))
+    else:
+        st.info("No hay movimientos registrados.")
 
 # ============================
 # TAB 3: ELIMINAR MOVIMIENTOS
@@ -72,7 +75,7 @@ with secciones[2]:
         edited_df = st.data_editor(
             df,
             use_container_width=True,
-            num_rows="dynamic",
+            column_order=list(df.columns),
             column_config={
                 "Seleccionar": st.column_config.CheckboxColumn(
                     "Eliminar",
