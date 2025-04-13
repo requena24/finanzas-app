@@ -24,10 +24,27 @@ credentials = Credentials.from_service_account_info(
 client = gspread.authorize(credentials)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
-# Forzar recarga si se guarda o elimina algo
-if "recargar" in st.session_state and st.session_state.recargar:
-    st.session_state.recargar = False
-    st.experimental_rerun()
+# Bandera de recarga para ejecutar rerun al final
+recarga_solicitada = False
+
+# ============================
+# FORMULARIO PARA NUEVO GASTO
+# ============================
+st.subheader("➕ Añadir nuevo movimiento")
+fecha = st.date_input("Fecha:", datetime.today())
+mes = fecha.strftime("%B")
+tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
+categoria = st.text_input("Categoría:")
+concepto = st.text_input("Concepto:")
+monto = st.number_input("Monto:", min_value=0.0, step=1.0)
+forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
+nota = st.text_area("Nota (opcional):")
+
+if st.button("Guardar movimiento 💾"):
+    nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
+    sheet.append_row(nueva_fila)
+    st.success("✅ Movimiento guardado correctamente.")
+    recarga_solicitada = True
 
 # Cargar datos
 datos = sheet.get_all_records()
@@ -52,9 +69,8 @@ for idx, row in df.iterrows():
     with col2:
         if st.button("🗑️", key=f"delete_{idx}"):
             sheet.delete_rows(idx + 2)
-            st.session_state.recargar = True
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            st.stop()
+            recarga_solicitada = True
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -119,22 +135,6 @@ if not df.empty:
 else:
     st.info("⚠️ No hay datos disponibles para exportar.")
 
-# ============================
-# FORMULARIO PARA NUEVO GASTO
-# ============================
-st.subheader("➕ Añadir nuevo movimiento")
-fecha = st.date_input("Fecha:", datetime.today())
-mes = fecha.strftime("%B")
-tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
-categoria = st.text_input("Categoría:")
-concepto = st.text_input("Concepto:")
-monto = st.number_input("Monto:", min_value=0.0, step=1.0)
-forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
-nota = st.text_area("Nota (opcional):")
-
-if st.button("Guardar movimiento 💾"):
-    nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
-    sheet.append_row(nueva_fila)
-    st.success("✅ Movimiento guardado correctamente.")
-    st.session_state.recargar = True
-    st.stop()
+# Ejecutar recarga al final si fue solicitada
+if recarga_solicitada:
+    st.experimental_rerun()
