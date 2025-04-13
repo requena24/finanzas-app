@@ -53,6 +53,52 @@ if "checkboxes" not in st.session_state:
 
 st.caption("Selecciona los movimientos que deseas eliminar:")
 
+# Recorremos cada fila del DataFrame y creamos un check# Importar librerías necesarias
+import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
+import pandas as pd
+from datetime import datetime
+import plotly.express as px
+import io
+import xlsxwriter
+
+# Título principal
+st.title("💰 Finanzas Personales")
+
+# Conexión a Google Sheets
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+credentials = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"], scopes=scope
+)
+client = gspread.authorize(credentials)
+sheet = client.open("finanzas-personales").worksheet("Hoja1")
+
+datos = sheet.get_all_records()
+df = pd.DataFrame(datos)
+df.columns = df.columns.str.lower()
+
+# Mostrar datos actuales
+st.subheader("📋 Movimientos actuales")
+st.dataframe(df)
+
+# =============================
+# SECCIÓN: ELIMINAR MOVIMIENTOS
+# =============================
+st.subheader("🗑 Eliminar movimientos")
+
+# Creamos el estado inicial para los checkboxes si no existe
+if "checkboxes" not in st.session_state:
+    st.session_state.checkboxes = {}
+
+# Mostramos un resumen por fila con checkbox para marcar
+st.caption("Selecciona los movimientos que deseas eliminar:")
+
 # Recorremos cada fila del DataFrame y creamos un checkbox único
 for idx, row in df.iterrows():
     checkbox_key = f"del_{idx}"
@@ -65,32 +111,20 @@ for idx, row in df.iterrows():
     except KeyError as e:
         st.warning(f"⚠️ Error al mostrar fila {idx}: columna faltante: {e}")
 
-# Botón de eliminar después de mostrar los checkboxes
+# Línea divisoria y botón después de la lista de checkboxes
 st.markdown("---")
 if st.button("🗑 Eliminar seleccionados"):
-    # Obtener índices seleccionados
+    # Obtener índices seleccionados (donde el checkbox esté marcado)
     filas_a_eliminar = [int(key.split("_")[1]) for key, val in st.session_state.checkboxes.items() if val]
 
     if filas_a_eliminar:
-        filas_a_eliminar.sort(reverse=True)  # Eliminar desde el final
+        filas_a_eliminar.sort(reverse=True)  # Eliminar desde el final para evitar desajustes
         for fila in filas_a_eliminar:
             sheet.delete_rows(fila + 2)  # +2 por encabezado y base 0
         st.success(f"✅ Se eliminaron {len(filas_a_eliminar)} movimiento(s).")
         st.experimental_rerun()
     else:
         st.info("No has seleccionado ningún movimiento para eliminar.")
-
-# Recorremos cada fila del DataFrame y creamos un checkbox único
-for idx, row in df.iterrows():
-    checkbox_key = f"del_{idx}"
-    try:
-        seleccionado = st.checkbox(
-            f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
-            key=checkbox_key
-        )
-        st.session_state.checkboxes[checkbox_key] = seleccionado
-    except KeyError as e:
-        st.warning(f"⚠️ Error al mostrar fila {idx}: columna faltante: {e}")
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
