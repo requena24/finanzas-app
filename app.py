@@ -196,10 +196,10 @@ with secciones[5]:
         df_edit_display = df.copy()
         df_edit_display['fecha'] = df_edit_display['fecha'].dt.strftime('%d/%m/%Y')
         df_edit_display['monto'] = df_edit_display['monto'].apply(lambda x: f"$ {x:,.2f}")
-        edited_df = st.data_editor(df_edit_display, 
-            df,
+        edited_df = st.data_editor(
+            df_edit_display,
             use_container_width=True,
-            column_order=list(df.columns),
+            column_order=list(df_edit_display.columns),
             column_config={
                 "Seleccionar": st.column_config.CheckboxColumn(
                     "Eliminar",
