@@ -31,7 +31,7 @@ df.columns = [str(col).lower() for col in df.columns]
 
 if not df.empty:
     df['monto'] = pd.to_numeric(df['monto'], errors='coerce').fillna(0)
-    df['fecha'] = pd.to_datetime(df['fecha'], errors='coerce').dt.date
+    df['fecha'] = pd.to_datetime(df['fecha'], errors='coerce')
 
 # Tabs para organizar secciones
 secciones = st.tabs(["📋 Movimientos", "➕ Agregar movimiento", "📑 Formas de pago", "💳 Wallet", "📊 Gráficos", "🗑 Eliminar"])
@@ -212,3 +212,4 @@ with secciones[5]:
                 st.warning("⚠️ No se seleccionó ningún movimiento para eliminar.")
     else:
         st.info("No hay movimientos para eliminar.")
+
