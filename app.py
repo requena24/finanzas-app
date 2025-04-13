@@ -5,7 +5,7 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
-import io  # para manejar archivos en memoria
+import io
 import xlsxwriter
 
 # Título principal
@@ -22,56 +22,41 @@ credentials = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"], scopes=scope
 )
 client = gspread.authorize(credentials)
-# Abrir hoja (reemplaza con tu nombre exacto)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
-# Cargar datos existentes
 datos = sheet.get_all_records()
+df = pd.DataFrame(datos)
+df.columns = df.columns.str.lower()
+
 # Mostrar datos actuales
 st.subheader("📋 Movimientos actuales")
-st.dataframe(pd.DataFrame(datos))
-
-# Convertimos datos a DataFrame de Pandas
-df = pd.DataFrame(datos)
-
-# Asegurarnos que 'Monto' sea numérico (por seguridad)
-df['Monto'] = pd.to_numeric(df['Monto'], errors='coerce').fillna(0)
-
-# Agrupamos por Mes y Tipo para sumar los montos
-resumen_mensual = df.groupby(['Mes', 'Tipo'])['Monto'].sum().reset_index()
+st.dataframe(df)
 
 # Gráfico de barras
+df['monto'] = pd.to_numeric(df['monto'], errors='coerce').fillna(0)
+resumen_mensual = df.groupby(['mes', 'tipo'])['monto'].sum().reset_index()
 st.subheader("📊 Ingresos vs Gastos por mes")
 fig_bar = px.bar(
-    resumen_mensual, 
-    x='Mes', 
-    y='Monto', 
-    color='Tipo', 
-    barmode='group', 
+    resumen_mensual,
+    x='mes',
+    y='monto',
+    color='tipo',
+    barmode='group',
     text_auto='.2s',
-    labels={'Monto': 'Total', 'Mes': 'Mes'}
+    labels={'monto': 'Total', 'mes': 'Mes'}
 )
-
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Filtramos solo gastos para el gráfico circular
-df_gastos = df[df['Tipo'] == 'Gasto']
-
-# Agrupamos gastos por categoría
-gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
-
-# Gráfico circular (si hay datos)
-df_gastos = df[df['Tipo'] == 'Gasto']
-
-if 'Categoría' in df_gastos.columns and not df_gastos['Categoría'].isna().all():
-    gastos_categoria = df_gastos.groupby('Categoría')['Monto'].sum().reset_index()
-
+# Gráfico circular
+df_gastos = df[df['tipo'] == 'Gasto']
+if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
+    gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
     if not gastos_categoria.empty:
         st.subheader("🍕 Distribución de gastos por categoría")
         fig_pie = px.pie(
             gastos_categoria,
-            values='Monto',
-            names='Categoría',
+            values='monto',
+            names='categoria',
             title='Distribución porcentual por categoría',
             hole=0.4
         )
@@ -81,19 +66,16 @@ if 'Categoría' in df_gastos.columns and not df_gastos['Categoría'].isna().all(
 else:
     st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
 
-import io
-
-st.subheader("📥 Exportar movimientos a Excel")
-
+# Exportar a Excel
+st.subheader("📅 Exportar movimientos a Excel")
 if not df.empty:
     output = io.BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Movimientos')
     writer.close()
     output.seek(0)
-
     st.download_button(
-        label="📤 Descargar archivo Excel",
+        label="📄 Descargar archivo Excel",
         data=output,
         file_name="finanzas_personales.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -101,41 +83,19 @@ if not df.empty:
 else:
     st.info("⚠️ No hay datos disponibles para exportar.")
 
-
-# --- NUEVO FORMULARIO PERSONALIZADO ---
+# Formulario para agregar nuevo movimiento
 st.subheader("➕ Añadir nuevo movimiento")
-
-# Fecha
 fecha = st.date_input("Fecha:", datetime.today())
-
-# Mes (automático según la fecha)
-mes = fecha.strftime("%B")  # Ejemplo: "Abril"
-
-# Tipo (Ingreso o Gasto)
+mes = fecha.strftime("%B")
 tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
-
-# Categoría
 categoria = st.text_input("Categoría:")
-
-# Concepto
 concepto = st.text_input("Concepto:")
-
-# Monto
 monto = st.number_input("Monto:", min_value=0.0, step=1.0)
-
-# Forma de Pago
 forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
-
-# Nota (opcional)
 nota = st.text_area("Nota (opcional):")
 
-# Botón para guardar movimiento
-if st.button("Guardar movimiento 💾"):
-    # Añadir la información en la hoja de Google Sheets
+if st.button("Guardar movimiento 📂"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
-    
     st.success("✅ Movimiento guardado correctamente.")
-
-    # Recargar para ver actualización inmediata
     st.experimental_rerun()
