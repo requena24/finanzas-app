@@ -26,7 +26,9 @@ sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
 datos = sheet.get_all_records()
 df = pd.DataFrame(datos)
-df.columns = df.columns.str.lower()
+
+# Aseguramos que todos los nombres de columnas sean cadenas antes de aplicar str.lower()
+df.columns = [str(col).lower() for col in df.columns]
 
 # Mostrar datos actuales
 st.subheader("📋 Movimientos actuales")
