@@ -11,11 +11,6 @@ import xlsxwriter
 # Título principal
 st.title("💰 Finanzas Personales")
 
-# Manejo de sesión para recargar tras eliminar
-if st.session_state.get("movimiento_eliminado"):
-    st.session_state["movimiento_eliminado"] = False
-    st.experimental_rerun()
-
 # Conexión a Google Sheets
 scope = [
     "https://spreadsheets.google.com/feeds",
@@ -59,9 +54,8 @@ for idx, row in df.iterrows():
     with col2:
         if st.button("🗑️", key=f"delete_{idx}"):
             sheet.delete_rows(idx + 2)  # +2 por encabezado y base 0
-            st.session_state["movimiento_eliminado"] = True
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            st.stop()
+            st.experimental_rerun()
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -124,7 +118,7 @@ else:
 # FORMULARIO PARA NUEVO GASTO
 # ============================
 st.subheader("➕ Añadir nuevo movimiento")
-fecha = st.date_input("Fecha:", datetime.today(), format="%d/%m/%Y")
+fecha = st.date_input("Fecha:", datetime.today())
 mes = fecha.strftime("%B")
 tipo = st.selectbox("Tipo:", ["Ingreso", "Gasto"])
 categoria = st.text_input("Categoría:")
