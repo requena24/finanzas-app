@@ -9,19 +9,6 @@ import plotly.express as px
 # Título principal
 st.title("💰 Finanzas Personales")
 
-# Inicializar estado de recarga si no existe
-if "recargar" not in st.session_state:
-    st.session_state.recargar = False
-
-# Recargar si es necesario
-if st.session_state.recargar:
-    st.session_state.recargar = False
-    st.experimental_rerun()
-
-# Botón para recargar manualmente
-if st.button("🔄 Recargar app"):
-    st.experimental_rerun()
-
 # Conexión a Google Sheets
 scope = [
     "https://spreadsheets.google.com/feeds",
@@ -51,8 +38,7 @@ nota = st.text_area("Nota (opcional):")
 if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
-    st.success("✅ Movimiento guardado correctamente.")
-    st.session_state.recargar = True
+    st.success("✅ Movimiento guardado correctamente. Recarga la app para ver los cambios.")
 
 # Cargar datos
 datos = sheet.get_all_records()
@@ -68,17 +54,32 @@ st.dataframe(df)
 # =============================
 st.subheader("🗑 Eliminar movimientos")
 
-st.caption("Haz clic en el botón para eliminar un movimiento específico:")
+if not df.empty:
+    df['Seleccionar'] = False
+    edited_df = st.data_editor(
+        df,
+        use_container_width=True,
+        num_rows="dynamic",
+        column_config={
+            "Seleccionar": st.column_config.CheckboxColumn(
+                "Eliminar",
+                default=False
+            )
+        },
+        hide_index=True,
+        key="editor"
+    )
 
-for idx, row in df.iterrows():
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        st.write(f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}")
-    with col2:
-        if st.button("🗑️", key=f"delete_{idx}"):
-            sheet.delete_rows(idx + 2)
-            st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            st.session_state.recargar = True
+    if st.button("Eliminar seleccionados 🗑️"):
+        rows_to_delete = edited_df[edited_df["Seleccionar"] == True]
+        if not rows_to_delete.empty:
+            for i in rows_to_delete.index:
+                sheet.delete_rows(i + 2)
+            st.success("✅ Movimientos eliminados correctamente. Recarga la app para ver los cambios.")
+        else:
+            st.warning("⚠️ No se seleccionó ningún movimiento para eliminar.")
+else:
+    st.info("No hay movimientos para eliminar.")
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
