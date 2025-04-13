@@ -44,6 +44,7 @@ with secciones[0]:
     if not df.empty:
         df_display = df.copy()
         df_display['fecha'] = df_display['fecha'].dt.strftime('%d/%m/%Y')
+        df_display['monto'] = df_display['monto'].apply(lambda x: f"$ {x:,.2f}")
         st.dataframe(df_display, hide_index=True)
     else:
         st.info("No hay movimientos registrados.")
@@ -86,6 +87,7 @@ with secciones[2]:
     if not df.empty and 'monto' in df.columns and 'forma de pago' in df.columns:
         resumen_pago = df[df['tipo'] == 'Gasto'].groupby('forma de pago')['monto'].sum().reset_index()
         resumen_pago.columns = ['Forma de pago', 'Total gastado']
+        resumen_pago['Total gastado'] = resumen_pago['Total gastado'].apply(lambda x: f"$ {x:,.2f}")
         st.dataframe(resumen_pago, use_container_width=True, hide_index=True)
 
     st.markdown("### 🧾 Gastos por tarjeta (con rango de fechas)")
@@ -103,6 +105,7 @@ with secciones[2]:
         if not df_tarjetas.empty:
             resumen_tarjetas = df_tarjetas.groupby('forma de pago')['monto'].sum().reset_index()
             resumen_tarjetas.columns = ['Tarjeta', 'Total gastado en rango']
+            resumen_tarjetas['Total gastado en rango'] = resumen_tarjetas['Total gastado en rango'].apply(lambda x: f"$ {x:,.2f}")
             st.dataframe(resumen_tarjetas, use_container_width=True, hide_index=True)
         else:
             st.info("No hay gastos con tarjetas en el rango de fechas seleccionado.")
