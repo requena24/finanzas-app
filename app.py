@@ -57,7 +57,7 @@ with secciones[0]:
 with secciones[1]:
     st.subheader("📋 Movimientos actuales")
     if not df.empty:
-        st.dataframe(df.drop(columns=[df.columns[0]]))
+        st.dataframe(df, hide_index=True)
     else:
         st.info("No hay movimientos registrados.")
 
