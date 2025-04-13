@@ -51,7 +51,7 @@ for idx, row in df.iterrows():
 
     # Mostramos cada movimiento como una línea con resumen e ID
     seleccionado = st.checkbox(
-        f"{row['Fecha']} - {row['Tipo']} - ${row['Monto']} - {row['Categoría']}",
+        f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}",
         key=checkbox_key
     )
 
