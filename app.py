@@ -32,6 +32,24 @@ df.columns = df.columns.str.lower()
 st.subheader("📋 Movimientos actuales")
 st.dataframe(df)
 
+# =============================
+# SECCIÓN: ELIMINAR MOVIMIENTOS
+# =============================
+st.subheader("🗑 Eliminar movimientos")
+
+st.caption("Haz clic en el botón para eliminar un movimiento específico:")
+
+# Recorremos cada fila del DataFrame y creamos un botón único por fila
+for idx, row in df.iterrows():
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        st.write(f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}")
+    with col2:
+        if st.button("🗑️", key=f"delete_{idx}"):
+            sheet.delete_rows(idx + 2)  # +2 por encabezado y base 0
+            st.success(f"✅ Movimiento eliminado: {row['concepto']}")
+            st.experimental_rerun()
+
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
 # ==================================
