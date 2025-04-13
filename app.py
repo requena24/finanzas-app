@@ -24,10 +24,14 @@ credentials = Credentials.from_service_account_info(
 client = gspread.authorize(credentials)
 sheet = client.open("finanzas-personales").worksheet("Hoja1")
 
+# Forzar recarga si se guarda o elimina algo
+if "recargar" in st.session_state and st.session_state.recargar:
+    st.session_state.recargar = False
+    st.experimental_rerun()
+
+# Cargar datos
 datos = sheet.get_all_records()
 df = pd.DataFrame(datos)
-
-# Aseguramos que todos los nombres de columnas sean cadenas antes de aplicar str.lower()
 df.columns = [str(col).lower() for col in df.columns]
 
 # Mostrar datos actuales
@@ -41,14 +45,14 @@ st.subheader("🗑 Eliminar movimientos")
 
 st.caption("Haz clic en el botón para eliminar un movimiento específico:")
 
-# Recorremos cada fila del DataFrame y creamos un botón único por fila
 for idx, row in df.iterrows():
     col1, col2 = st.columns([5, 1])
     with col1:
         st.write(f"{row['fecha']} - {row['tipo']} - ${row['monto']} - {row['categoria']}")
     with col2:
         if st.button("🗑️", key=f"delete_{idx}"):
-            sheet.delete_rows(idx + 2)  # +2 por encabezado y base 0
+            sheet.delete_rows(idx + 2)
+            st.session_state.recargar = True
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
             st.stop()
 
@@ -132,4 +136,5 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
+    st.session_state.recargar = True
     st.stop()
