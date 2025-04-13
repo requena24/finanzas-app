@@ -75,23 +75,26 @@ else:
 # ===============================
 # GRÁFICO CIRCULAR DE CATEGORÍAS
 # ===============================
-df_gastos = df[df['tipo'] == 'Gasto']
-if 'categoria' in df_gastos.columns and not df_gastos['categoria'].isna().all():
-    gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
-    if not gastos_categoria.empty:
-        st.subheader("🍕 Distribución de gastos por categoría")
-        fig_pie = px.pie(
-            gastos_categoria,
-            values='monto',
-            names='categoria',
-            title='Distribución porcentual por categoría',
-            hole=0.4
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
+if 'tipo' in df.columns and 'categoria' in df.columns and 'monto' in df.columns:
+    df_gastos = df[df['tipo'] == 'Gasto']
+    if not df_gastos.empty and not df_gastos['categoria'].isna().all():
+        gastos_categoria = df_gastos.groupby('categoria')['monto'].sum().reset_index()
+        if not gastos_categoria.empty:
+            st.subheader("🍕 Distribución de gastos por categoría")
+            fig_pie = px.pie(
+                gastos_categoria,
+                values='monto',
+                names='categoria',
+                title='Distribución porcentual por categoría',
+                hole=0.4
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
+        else:
+            st.info("⚠️ No hay montos válidos para las categorías.")
     else:
-        st.info("⚠️ No hay montos válidos para las categorías.")
+        st.info("⚠️ No hay datos válidos de gastos para mostrar el gráfico.")
 else:
-    st.info("⚠️ No se encontraron categorías válidas para mostrar el gráfico.")
+    st.info("⚠️ No se encontraron columnas necesarias para mostrar el gráfico circular.")
 
 # ==============================
 # EXPORTAR MOVIMIENTOS A EXCEL
