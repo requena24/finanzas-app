@@ -50,7 +50,7 @@ for idx, row in df.iterrows():
         if st.button("🗑️", key=f"delete_{idx}"):
             sheet.delete_rows(idx + 2)  # +2 por encabezado y base 0
             st.success(f"✅ Movimiento eliminado: {row['concepto']}")
-            st.experimental_rerun()
+            st.stop()
 
 # ==================================
 # GRÁFICO DE BARRAS: INGRESOS/GASTOS
@@ -132,4 +132,4 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
-    st.experimental_rerun()
+    st.stop()
