@@ -28,6 +28,13 @@ datos = sheet.get_all_records()
 df = pd.DataFrame(datos)
 df.columns = df.columns.str.lower()
 
+# Convertir fecha a datetime y formatear a dd/mm/yyyy si es posible
+if 'fecha' in df.columns:
+    try:
+        df['fecha'] = pd.to_datetime(df['fecha']).dt.strftime('%d/%m/%Y')
+    except:
+        pass
+
 # Mostrar datos actuales
 st.subheader("📋 Movimientos actuales")
 st.dataframe(df)
@@ -121,7 +128,7 @@ forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferenc
 nota = st.text_area("Nota (opcional):")
 
 if st.button("Guardar movimiento 💾"):
-    nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
+    nueva_fila = [fecha.strftime('%d/%m/%Y'), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
     st.experimental_rerun()
