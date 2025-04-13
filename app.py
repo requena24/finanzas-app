@@ -132,4 +132,4 @@ if st.button("Guardar movimiento 💾"):
     nueva_fila = [str(fecha), mes, tipo, categoria, concepto, monto, forma_pago, nota]
     sheet.append_row(nueva_fila)
     st.success("✅ Movimiento guardado correctamente.")
-    st.experimental_rerun()
+    st.experimental_rerun() 
