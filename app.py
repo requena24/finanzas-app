@@ -50,8 +50,9 @@ with secciones[0]:
         forma_pago = st.selectbox("Forma de Pago:", ["Efectivo", "Tarjeta", "Transferencia", "Otro"])
 
         tarjetas = sheet_wallet.col_values(1)[1:] if sheet_wallet.row_count > 1 else []
+        if not tarjetas:
+            st.warning("⚠️ No tienes tarjetas registradas. Ve a la sección Wallet para agregarlas.")
         tarjeta_usada = st.selectbox("Selecciona la tarjeta usada (solo si aplica):", tarjetas) if tarjetas else st.text_input("Tarjeta usada (solo si aplica):")
-                st.warning("⚠️ No tienes tarjetas registradas. Ve a la sección Wallet para agregarlas.")
 
         nota = st.text_area("Nota (opcional):")
         submit = st.form_submit_button("Guardar movimiento 💾")
